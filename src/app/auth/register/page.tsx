@@ -6,7 +6,7 @@ import { register as registerAction } from "@/actions/auth";
 import { toast } from "react-toastify";
 import Loader from "@/components/Loader";
 
-export default function page(): JSX.Element {
+export default function Page(): JSX.Element {
     const [name, setName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");

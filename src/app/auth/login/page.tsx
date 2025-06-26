@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import useUser from "@/hooks/useUser";
 import Loader from "@/components/Loader";
 
-export default function page(): JSX.Element {
+export default function Page(): JSX.Element {
 
     const router = useRouter();
     const { setUser } = useUser();

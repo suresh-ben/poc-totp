@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/Loader";
 
-export default function page(): JSX.Element {
+export default function Page(): JSX.Element {
     const router = useRouter();
 
     const [secret, setSecret] = useState<string>("");
