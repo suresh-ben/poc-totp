@@ -31,7 +31,7 @@ export default function AuthWrapper({
                 else setIsLoading(false);
             }
         })();
-    }, []);
+    }, [currentPath, setUser]);
 
     if (isLoading) {
         return (

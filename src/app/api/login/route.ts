@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
-    var db = new JsonDB(new Config("myDataBase", true, true, "/"));
+    const db = new JsonDB(new Config("myDataBase", true, true, "/"));
 
     const { email, password } = await req.json();
 

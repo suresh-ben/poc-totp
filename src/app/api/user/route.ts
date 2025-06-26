@@ -4,8 +4,8 @@ import User from "@/config/types/User";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
-export async function GET(req: Request) {
-    var db = new JsonDB(new Config("myDataBase", true, true, "/"));
+export async function GET() {
+    const db = new JsonDB(new Config("myDataBase", true, true, "/"));
 
     try {
         //get the token from cookies and get user from db

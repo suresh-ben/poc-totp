@@ -5,6 +5,7 @@ import { JSX } from "react";
 import { register as registerAction } from "@/actions/auth";
 import { toast } from "react-toastify";
 import Loader from "@/components/Loader";
+import { AxiosError } from "axios";
 
 export default function Page(): JSX.Element {
     const [name, setName] = useState<string>("");
@@ -31,10 +32,12 @@ export default function Page(): JSX.Element {
             setIsLoading(true);
             await registerAction(name, email, password);
             window.location.href = "/";
-        } catch (error: any) {
-            toast.error(
-                error?.response?.data?.message || "User registration failed"
-            );
+        } catch (error: unknown) {
+            if(error instanceof AxiosError) {
+                toast.error(error?.response?.data?.message || "User registration failed");
+            } else {
+                toast.error("User registration failed");
+            }
         } finally {
             setIsLoading(false);
         }

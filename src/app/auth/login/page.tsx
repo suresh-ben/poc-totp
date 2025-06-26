@@ -7,6 +7,7 @@ import { login as loginAction, verifyLogin as verifyLoginAction } from "@/action
 import { useRouter } from "next/navigation";
 import useUser from "@/hooks/useUser";
 import Loader from "@/components/Loader";
+import { AxiosError } from "axios";
 
 export default function Page(): JSX.Element {
 
@@ -31,8 +32,12 @@ export default function Page(): JSX.Element {
             setIsLoading(true);
             await loginAction(email, password);
             setIsPasswordVerified(true);
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || "User login failed");
+        } catch (error: unknown) {
+            if(error instanceof AxiosError) {
+                toast.error(error?.response?.data?.message || "User login failed");
+            } else {
+                toast.error("User login failed");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -46,8 +51,12 @@ export default function Page(): JSX.Element {
             router.push("/");
 
             toast.success("Successfully logged in");
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || "User login failed");
+        } catch (error: unknown) {
+            if(error instanceof AxiosError) {
+                toast.error(error?.response?.data?.message || "User login failed");
+            } else {
+                toast.error("User login failed");
+            }
         } finally {
             setIsLoading(false);
         }

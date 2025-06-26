@@ -6,6 +6,7 @@ import { logout as logOutUser } from "@/actions/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Loader from "@/components/Loader";
+import { AxiosError } from "axios";
 
 export default function Home(): JSX.Element {
     const router = useRouter();
@@ -20,8 +21,12 @@ export default function Home(): JSX.Element {
             router.push("/auth/login");
 
             toast.error("Successfully logged out");
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Failed to logout");
+        } catch (error: unknown) {
+            if(error instanceof AxiosError) {
+                toast.error(error?.response?.data?.message || "Failed to logout!");
+            } else {
+                toast.error("Failed to logout!");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -30,7 +35,7 @@ export default function Home(): JSX.Element {
     return (
         <div className="w-screen h-screen flex flex-col sm:flex-row relative">
             {isLoading && <Loader />}
-            
+
             <div className="absolute top-0 right-0 p-10 text-2xl">
                 {user?.name}
             </div>

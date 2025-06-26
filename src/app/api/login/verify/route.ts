@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import speakEasy from "speakeasy";
 
 export async function POST(req: Request) {
-    var db = new JsonDB(new Config("myDataBase", true, true, "/"));
+    const db = new JsonDB(new Config("myDataBase", true, true, "/"));
 
     const { totp } = await req.json();
 

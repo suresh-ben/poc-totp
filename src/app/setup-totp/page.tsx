@@ -7,6 +7,7 @@ import { verifyTotp } from "@/actions/auth";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/Loader";
+import { AxiosError } from "axios";
 
 export default function Page(): JSX.Element {
     const router = useRouter();
@@ -21,10 +22,12 @@ export default function Page(): JSX.Element {
             setIsLoading(true);
             const { secretUrl } = await requestTotpSecret();
             setSecret(secretUrl);
-        } catch (error: any) {
-            toast.error(
-                error?.response?.data?.message || "Failed to generate secret"
-            );
+        } catch (error: unknown) {
+            if(error instanceof AxiosError) {
+                toast.error(error?.response?.data?.message || "Failed to generate secret!");
+            } else {
+                toast.error("Failed to generate secret!");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -43,10 +46,12 @@ export default function Page(): JSX.Element {
             toast.success("Successfully verified totp");
 
             router.push("/");
-        } catch (error: any) {
-            toast.error(
-                error?.response?.data?.message || "Failed to verify totp"
-            );
+        } catch (error: unknown) {
+            if(error instanceof AxiosError) {
+                toast.error(error?.response?.data?.message || "Failed to verify totp!");
+            } else {
+                toast.error("Failed to verify totp!");
+            }
         } finally {
             setIsLoading(false);
         }
