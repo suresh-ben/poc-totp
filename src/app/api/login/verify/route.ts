@@ -1,16 +1,18 @@
 import User from "@/config/types/User";
-import { JsonDB, Config } from "node-json-db";
+import Secret from "@/config/types/Secret";
+import { connectToDatabase } from "@/lib/mongodb";
+import { User as UserModel } from "@/models/User";
+import { Secret as SecretModel } from "@/models/Secret";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import speakEasy from "speakeasy";
 
 export async function POST(req: Request) {
-    const db = new JsonDB(new Config("myDataBase", true, true, "/"));
-
-    const { totp } = await req.json();
-
     try {
+        await connectToDatabase();
+        const { totp } = await req.json();
+
         //get the token from cookies and get user from db
         const cookieStore = await cookies();
         const _token = cookieStore.get("token")?.value;
@@ -20,17 +22,14 @@ export async function POST(req: Request) {
         const jwt_secret: string = process.env.COOKIE_SECRET || "Secret";
         const { email } = jwt.verify(token, jwt_secret) as { email: string };
 
-        const user: User = await db.getData(`/users/${email}`);
-        if (!user)
-            return NextResponse.json(
-                { message: "User not found" },
-                { status: 404 }
-            );
+        const user: (User | null) = await UserModel.findOne({ email });
+        if (!user) return NextResponse.json({ message: "User not found" }, { status: 404 });
 
-        const temp_secret = await db.getData(`/users/${email}/totp/secret`);
+        const secret: (Secret | null) = await SecretModel.findOne({ email });
+        if(!secret) return NextResponse.json({ message: "TOTP is not found. You wont be able to login, Please contact admin." }, { status: 404 });
 
         const verified = speakEasy.totp.verify({
-            secret: temp_secret,
+            secret: secret.secret,
             encoding: "base32",
             token: totp,
             window: 1,

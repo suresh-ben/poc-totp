@@ -6,7 +6,6 @@ const defaultUserData: User = {
     name: "",
     email: "",
     password: "",
-    id: "",
 };
 
 type UserContextType = {

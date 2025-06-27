@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "TOTP POC",
-    description: "Poc for TOTP MFA",
+    title: "TOTP MFA POC",
+    description: "TOTP MFA POC",
 };
 
 export default async function RootLayout({

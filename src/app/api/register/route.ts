@@ -1,38 +1,28 @@
-import { JsonDB, Config } from "node-json-db";
 import { NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
+import { connectToDatabase } from "@/lib/mongodb";
+import { User as UserModel } from "@/models/User";
 import User from "@/config/types/User";
 import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
-    const db = new JsonDB(new Config("myDataBase", true, true, "/"));
-
-    const { name, email, password } = await req.json();
-
     try {
-        const id = uuidv4();
+        await connectToDatabase();
+        const { name, email, password } = await req.json();
 
-        const user: User = {
-            id,
+        const existingUser: User | null = await UserModel.findOne({ email });
+        if (existingUser)
+            return NextResponse.json(
+                { message: "User already exists" },
+                { status: 400 }
+            );
+
+        // save user to database
+        const user = await UserModel.create({
             name,
             email,
             password,
-        };
-
-        try {
-            const existingUser: User = await db.getData(`/users/${email}`);
-            if (existingUser) {
-                return NextResponse.json(
-                    { message: "User already exists" },
-                    { status: 400 }
-                );
-            }
-        } catch (error) {
-            console.error(error);
-        }
-
-        await db.push(`/users/${email}`, user);
-        await db.save();
+        });
+        await user.save();
 
         const jwt_secret: string = process.env.COOKIE_SECRET || "Secret";
         const token = jwt.sign({ email }, jwt_secret, { expiresIn: "1h" });

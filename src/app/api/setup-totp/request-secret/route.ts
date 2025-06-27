@@ -1,14 +1,17 @@
-import { JsonDB, Config } from "node-json-db";
 import { NextResponse } from "next/server";
 import User from "@/config/types/User";
 import speaskEasy from "speakeasy";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { connectToDatabase } from "@/lib/mongodb";
+import { User as UserModel } from "@/models/User";
+import { TempSecret as TempSecretModel } from "@/models/TempSecret";
 
 export async function GET() {
-    const db = new JsonDB(new Config("myDataBase", true, true, "/"));
 
     try {
+        await connectToDatabase();
+
         const temp_secret = speaskEasy.generateSecret({
             name: "Veots",
             issuer: "Veots",
@@ -24,15 +27,11 @@ export async function GET() {
         const jwt_secret: string = process.env.COOKIE_SECRET || "Secret";
         const { email } = jwt.verify(token, jwt_secret) as { email: string };
 
-        const user: User = await db.getData(`/users/${email}`);
-        if (!user) {
-            return NextResponse.json(
-                { message: "User not found" },
-                { status: 404 }
-            );
-        }
+        const user: (User | null) = await UserModel.findOne({ email });
+        if (!user) return NextResponse.json({ message: "User not found" }, { status: 404 });
 
-        await db.push(`/users/${email}/totp/temp-secret`, secret);
+        await TempSecretModel.findOneAndUpdate({ email }, { $set: {secret} }, { upsert: true, new: true });
+
         return NextResponse.json(
             { secretUrl: temp_secret.otpauth_url },
             { status: 200 }

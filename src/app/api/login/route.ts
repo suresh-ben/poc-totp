@@ -1,21 +1,17 @@
 import User from "@/config/types/User";
-import { JsonDB, Config } from "node-json-db";
 import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/mongodb";
+import { User as UserModel } from "@/models/User";
 import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
-    const db = new JsonDB(new Config("myDataBase", true, true, "/"));
-
-    const { email, password } = await req.json();
-
     try {
-        const user: User = await db.getData(`/users/${email}`);
-        if (!user) {
-            return NextResponse.json(
-                { message: "User not found" },
-                { status: 404 }
-            );
-        }
+        await connectToDatabase();
+        const { email, password } = await req.json();
+
+        const user: (User | null) = await UserModel.findOne({ email });
+        if (!user) return NextResponse.json({ message: "User not found" }, { status: 404 });
+        
         if (user.password !== password) {
             return NextResponse.json(
                 { message: "Invalid password" },
